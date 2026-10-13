@@ -1,0 +1,6 @@
+{
+  "name": "diogo-mods",
+  "description": "Mods pessoais para Claude Code",
+  "owner": { "name": "Diogo" },
+  "plugins": [{ "name": "task-progress", "source": "./task-progress" }]
+}
