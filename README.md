@@ -6,7 +6,7 @@ Mods pessoais para Claude Code (terminal e aba Code do app desktop).
 
 | Mod | O que faz |
 |---|---|
-| `task-progress` | Barra de progresso acima do prompt com passo atual, contador (3/7) e cor que vai do vermelho ao verde. `/progresso-demo` simula 7 passos. |
+| `task-progress` | Barra de progresso acima do prompt com passo atual, contador (3/7) e cor que vai do vermelho ao verde. |
 
 ## Instalação
 

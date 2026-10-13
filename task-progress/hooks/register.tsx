@@ -13,31 +13,8 @@ export function colorFor(ratio: number): string {
   return '#ef4444'
 }
 
-const DEMO = ['Lendo o código', 'Planejando', 'Escrevendo testes', 'Implementando', 'Rodando os testes', 'Revisando', 'Finalizando']
 
 export const register: Register = on => {
-  on('session.start', async ($, e, next) => {
-    await $.command.register({ name: 'progresso-demo', description: 'Simula 7 passos para ver a barra de progresso' })
-    return next(e)
-  })
-
-  on('command.run', { command: 'progresso-demo' }, async $ => {
-    void (async () => {
-      for (let i = 0; i <= DEMO.length; i++) {
-        if (i > 0) await $.clock.sleep(2000)
-        await update($, steps, () =>
-          DEMO.map((d, j) => ({
-            id: `demo${j}`,
-            subject: d,
-            active: d,
-            status: j < i ? 'completed' : j === i ? 'in_progress' : 'pending',
-          })),
-        )
-      }
-    })()
-    return { text: 'Demo da barra iniciada (7 passos, ~14s).' }
-  })
-
   on('tool.call', { tool: 'TodoWrite' }, async ($, e, next) => {
     const ran = await next(e)
     if (ran.deny === undefined && !ran.isError) {
