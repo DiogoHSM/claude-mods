@@ -10,7 +10,18 @@ Mods pessoais para Claude Code (terminal e aba Code do app desktop).
 
 ## Instalação
 
-Local:
+```bash
+claude plugin marketplace add DiogoHSM/claude-mods
+claude plugin install task-progress@diogo-mods --scope user
+```
+
+Ou, no prompt do Claude Code:
+
+```
+/plugin install task-progress --marketplace DiogoHSM/claude-mods
+```
+
+### Desenvolvimento local
 
 ```bash
 claude plugin marketplace add ~/Developer/Github/claude-mods
