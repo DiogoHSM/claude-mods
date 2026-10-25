@@ -6,11 +6,8 @@ Mods pessoais para Claude Code (terminal e aba Code do app desktop).
 
 | Mod | O que faz |
 |---|---|
-| `task-progress` | Barra de progresso acima do prompt com passo atual, contador (3/7) e cor que vai do vermelho ao verde. |
 | `agentes-pixel` | Painel lateral com pixel art de cada subagent (modelo, status, tempo, tokens, resumo), bolinhas de status das tarefas e barra do plano acima do prompt. `/agentes` reabre o painel. |
 | `polimento-visual` | Pill de contexto usado/total abaixo do prompt, borda laranja nas suas mensagens e ícones coloridos por tipo de ferramenta. |
-
-`task-progress` e `agentes-pixel` desenham barras de plano acima do prompt; use um dos dois.
 
 ## Instalação
 

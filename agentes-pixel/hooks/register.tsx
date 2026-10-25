@@ -141,12 +141,16 @@ function moveTo(task: TaskDot, state: TaskState, at: number): TaskDot {
   return next
 }
 
-function replaceAll(previous: TaskDot[], items: { subject: string; status: unknown }[], at: number): TaskDot[] {
+function replaceAll(
+  previous: TaskDot[],
+  items: { subject: string; status: unknown; active?: string }[],
+  at: number,
+): TaskDot[] {
   return items.map((item, i) => {
     const old = previous.find(one => one.subject === item.subject)
     const base: TaskDot = old ?? { id: `p${i}`, subject: item.subject, state: 'pending' }
 
-    return moveTo({ ...base, id: `p${i}` }, toTaskState(item.status), at)
+    return moveTo({ ...base, id: `p${i}`, active: item.active ?? base.active }, toTaskState(item.status), at)
   })
 }
 
@@ -244,7 +248,13 @@ async function showAgent($: EngineInterface, id: string) {
   const shown = await $.ui.view({ agentId: id })
   if (shown.deny === undefined) return
   if (!row?.result) {
-    $.ui.toast(row?.state === 'running' ? 'O agent ainda está rodando; o resultado aparece aqui quando terminar.' : shown.deny)
+    $.ui.toast(
+      row?.state === 'running'
+        ? 'O agent ainda está rodando; o resultado aparece aqui quando terminar.'
+        : row
+          ? 'A resposta do agent está chegando; tente de novo em instantes.'
+          : shown.deny,
+    )
     return
   }
   await update($, agents, list => list.map(one => (one.id === id ? { ...one, isExpanded: true } : one)))
@@ -374,7 +384,8 @@ export const register: Register = on => {
     const created = ran.deny === undefined ? (ran.result as { task?: { id?: string } } | undefined) : undefined
     const id = created?.task?.id
     if (id !== undefined) {
-      await setTasks($, e.agentId ?? MAIN, list => [...list, { id, subject: e.subject, state: 'pending' }])
+      const task: TaskDot = { id, subject: e.subject, active: e.activeForm, state: 'pending' }
+      await setTasks($, e.agentId ?? MAIN, list => [...(list.every(one => one.state === 'done') ? [] : list), task])
     }
 
     return ran
@@ -388,7 +399,7 @@ export const register: Register = on => {
           ? list.filter(task => task.id !== e.taskId)
           : list.map(task =>
               task.id === e.taskId
-                ? moveTo({ ...task, subject: e.subject ?? task.subject }, e.status ? toTaskState(e.status) : task.state, at)
+                ? moveTo({ ...task, subject: e.subject ?? task.subject, active: e.activeForm ?? task.active }, e.status ? toTaskState(e.status) : task.state, at)
                 : task,
             ),
       )
@@ -401,7 +412,7 @@ export const register: Register = on => {
     const ran = await next(e)
     if (ran.deny === undefined && !ran.isError) {
       await setTasks($, e.agentId ?? MAIN, (list, at) =>
-        replaceAll(list, e.todos.map(todo => ({ subject: todo.content, status: todo.status })), at),
+        replaceAll(list, e.todos.map(todo => ({ subject: todo.content, status: todo.status, active: todo.activeForm })), at),
       )
     }
 
@@ -526,12 +537,15 @@ export const register: Register = on => {
         : list.findIndex(task => task.state !== 'done'),
     )
     const head = list[index]
+    const done = list.filter(task => task.state === 'done').length
+    const percent = Math.round((done / n) * 100)
     const Svg = e.surface === 'terminal' ? undefined : $.ui.resolve(e).Svg
+    const cell = Math.max(2, Math.floor((e.props.bodyColumns + 1) / n) - 1)
     const bar =
       !Svg ? (
         <Box flexDirection="row">
           {list.map(task => (
-            <Text color={THEME[task.state]}>{'━━━━ '}</Text>
+            <Text color={THEME[task.state]}>{`${'━'.repeat(cell)} `}</Text>
           ))}
         </Box>
       ) : (
@@ -542,7 +556,7 @@ export const register: Register = on => {
       <Box key="plano" flexDirection="column">
         {bar}
         {head && (
-          <Text dimColor>{`Etapa ${index + 1}/${n} · ${head.subject} — ${TASK_LABEL[head.state]}`}</Text>
+          <Text dimColor>{`Etapa ${index + 1}/${n} · ${percent}% · ${head.state === 'running' && head.active ? head.active : head.subject} — ${TASK_LABEL[head.state]}`}</Text>
         )}
         <Box flexDirection="column" display="none" hover={{ display: 'flex' }}>
           {list.map((task, i) => (

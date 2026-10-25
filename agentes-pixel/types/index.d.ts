@@ -20,6 +20,7 @@ export type TaskState = 'pending' | 'running' | 'done' | 'error'
 export type TaskDot = {
   id: string
   subject: string
+  active?: string
   state: TaskState
   startedAt?: number
   endedAt?: number

@@ -71,7 +71,7 @@ test('o plano vira bolinhas e barra acima do prompt', async ($, on) => {
   await clock.settle()
 
   const band = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect(await band.find({ type: 'Text', text: /Etapa 2\/3 · Escrever mod — executando/ })).toBeDefined()
+  expect(await band.find({ type: 'Text', text: /Etapa 2\/3 · 33% · Escrever mod — executando/ })).toBeDefined()
   await band.unmount()
 
   const desktop = await $.ui.mount({ ...BAND, surface: 'desktop' })
@@ -81,7 +81,7 @@ test('o plano vira bolinhas e barra acima do prompt', async ($, on) => {
   await $.tool.call({ tool: 'mcp__ccd_turn__update_plan', advance: true })
   await clock.settle()
   const after = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect(await after.find({ type: 'Text', text: /Etapa 3\/3 · Testar — executando/ })).toBeDefined()
+  expect(await after.find({ type: 'Text', text: /Etapa 3\/3 · 67% · Testar — executando/ })).toBeDefined()
   await after.unmount()
 
   const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })

@@ -141,8 +141,10 @@ export const register: Register = on => {
     }
 
     return (
-      <Box alignSelf="flex-start" borderStyle="round" borderColor="claude" paddingX={1} paddingY={0} marginY={1}>
-        <Text>{e.props.text}</Text>
+      <Box flexDirection="row" marginY={1}>
+        <Box flexShrink={1} borderStyle="round" borderColor="claude" paddingX={1}>
+          <Text>{e.props.text}</Text>
+        </Box>
       </Box>
     )
   })

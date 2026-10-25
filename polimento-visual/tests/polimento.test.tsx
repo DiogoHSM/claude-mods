@@ -16,7 +16,7 @@ test('sua mensagem ganha borda laranja; a de outro agente não', async ($, on) =
     requestId: 'm1',
     props: { text: 'oi', origin: { kind: 'sdk' }, isExpanded: false },
   })
-  expect(await mine.drawn()).toMatchObject({ type: 'Box', props: { borderColor: 'claude' } })
+  expect(await mine.drawn()).toMatchObject({ type: 'Box', children: [{ type: 'Box', props: { borderColor: 'claude' } }] })
   await mine.unmount()
 
   const note = await $.ui.mount({
