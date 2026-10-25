@@ -235,6 +235,21 @@ function stepLine(task: TaskDot, i: number, n: number, at: number): string {
   return `${i + 1}/${n} · ${task.subject} — ${TASK_LABEL[task.state]}${time}`
 }
 
+async function showAgent($: EngineInterface, id: string) {
+  const row = (await read($, agents)).find(one => one.id === id)
+  if (row?.isExpanded) {
+    await update($, agents, list => list.map(one => (one.id === id ? { ...one, isExpanded: false } : one)))
+    return
+  }
+  const shown = await $.ui.view({ agentId: id })
+  if (shown.deny === undefined) return
+  if (!row?.result) {
+    $.ui.toast(row?.state === 'running' ? 'O agent ainda está rodando; o resultado aparece aqui quando terminar.' : shown.deny)
+    return
+  }
+  await update($, agents, list => list.map(one => (one.id === id ? { ...one, isExpanded: true } : one)))
+}
+
 let isOpen = false
 let ticker: Timer | undefined
 
@@ -345,6 +360,8 @@ export const register: Register = on => {
     if (e.agentId !== undefined) {
       const state: AgentState = e.reason === 'answer' ? 'done' : 'error'
       await finish($, new Map([[e.agentId, state]]), at)
+      const id = e.agentId
+      if (done.text) await update($, agents, list => list.map(row => (row.id === id ? { ...row, result: done.text } : row)))
     } else if (e.reason === 'error') {
       await update($, tasks, plan => ({ ...plan, [MAIN]: failRunning(plan[MAIN], at) ?? [] }))
     }
@@ -455,8 +472,13 @@ export const register: Register = on => {
                 <Text dimColor tabular>
                   {elapsed((row.endedAt ?? at) - row.startedAt)} · ~{tokens(row.tokens)} tokens
                 </Text>
+                {row.isExpanded && row.result && (
+                  <Box borderStyle="round" borderColor="subtle" paddingX={1} marginTop={1}>
+                    <Text>{row.result.length > 4000 ? `${row.result.slice(0, 4000)}…` : row.result}</Text>
+                  </Box>
+                )}
               </Box>
-              <Button key={`ver-${row.id}`} label="Ver" plain onPress={() => void $.ui.view({ agentId: row.id })} />
+              <Button key={`ver-${row.id}`} label={row.isExpanded ? 'Ocultar' : 'Ver'} plain onPress={() => void showAgent($, row.id)} />
             </Box>
           )
         })}

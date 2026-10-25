@@ -11,6 +11,8 @@ export type AgentRow = {
   startedAt: number
   endedAt?: number
   tokens: number
+  result?: string
+  isExpanded?: boolean
 }
 
 export type TaskState = 'pending' | 'running' | 'done' | 'error'
