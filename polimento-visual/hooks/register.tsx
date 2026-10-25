@@ -115,7 +115,7 @@ export const register: Register = on => {
 
     return (
       <Box flexDirection="row" justifyContent="space-between" alignItems="center" gap={1}>
-        <Box flexShrink={1} minWidth={0}>
+        <Box flexShrink={1}>
           {own}
         </Box>
         <Box borderStyle="round" borderColor="subtle" paddingX={1} flexShrink={0}>
@@ -131,11 +131,18 @@ export const register: Register = on => {
   on('ui.render', { component: 'UserMessage' }, async ($, e, next) => {
     const own = await next(e)
     if (!PERSON.has(e.props.origin.kind) || e.props.from !== undefined) return own
-    const { Box } = $.ui.resolve(e)
+    const { Box, Text } = $.ui.resolve(e)
+    if (e.surface === 'terminal') {
+      return (
+        <Box borderStyle="round" borderColor="claude" paddingX={1}>
+          {own}
+        </Box>
+      )
+    }
 
     return (
-      <Box alignSelf="flex-start" borderStyle="round" borderColor="claude">
-        {own}
+      <Box alignSelf="flex-start" borderStyle="round" borderColor="claude" paddingX={1} paddingY={0} marginY={1}>
+        <Text>{e.props.text}</Text>
       </Box>
     )
   })
@@ -153,7 +160,7 @@ export const register: Register = on => {
         ) : (
           <Text color="claude">{GLYPH.skill}</Text>
         )}
-        <Box flexGrow={1} flexShrink={1} minWidth={0}>
+        <Box flexGrow={1} flexShrink={1}>
           {own}
         </Box>
       </Box>
@@ -174,7 +181,7 @@ export const register: Register = on => {
         ) : (
           <Text color={color}>{GLYPH[kind]}</Text>
         )}
-        <Box flexGrow={1} flexShrink={1} minWidth={0}>
+        <Box flexGrow={1} flexShrink={1}>
           {own}
         </Box>
       </Box>
@@ -196,7 +203,7 @@ export const register: Register = on => {
         ) : (
           <Text color={COLOR[kind]}>{GLYPH[kind]}</Text>
         )}
-        <Box flexGrow={1} flexShrink={1} minWidth={0}>
+        <Box flexGrow={1} flexShrink={1}>
           {own}
         </Box>
       </Box>

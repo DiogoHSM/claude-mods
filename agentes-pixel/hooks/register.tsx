@@ -400,6 +400,17 @@ export const register: Register = on => {
     return ran
   }).catch(($, e, next) => next(e))
 
+  on('tool.call', { tool: 'mcp__ccd_turn__wrap_up' }, async ($, e, next) => {
+    const ran = await next(e)
+    if (ran.deny === undefined && !ran.isError) {
+      await setTasks($, e.agentId ?? MAIN, (list, at) =>
+        list.map(task => (task.state === 'done' || task.state === 'error' ? task : moveTo(task, 'done', at))),
+      )
+    }
+
+    return ran
+  }).catch(($, e, next) => next(e))
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)
     const Svg = e.surface === 'terminal' ? undefined : $.ui.resolve(e).Svg
