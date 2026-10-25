@@ -2,5 +2,9 @@
   "name": "diogo-mods",
   "description": "Mods pessoais para Claude Code",
   "owner": { "name": "Diogo" },
-  "plugins": [{ "name": "task-progress", "source": "./task-progress" }]
+  "plugins": [
+    { "name": "task-progress", "source": "./task-progress" },
+    { "name": "agentes-pixel", "source": "./agentes-pixel" },
+    { "name": "polimento-visual", "source": "./polimento-visual" }
+  ]
 }

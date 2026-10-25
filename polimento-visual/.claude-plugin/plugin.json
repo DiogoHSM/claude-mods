@@ -1,0 +1,6 @@
+{
+  "name": "polimento-visual",
+  "version": "0.1.0",
+  "description": "Pill de contexto sob o prompt, borda laranja nas suas mensagens e ícones coloridos por tipo de execução",
+  "types": "./types/index.d.ts"
+}

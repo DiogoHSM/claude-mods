@@ -1,0 +1,6 @@
+{
+  "name": "agentes-pixel",
+  "version": "0.1.0",
+  "description": "Painel lateral com subagents em pixel art, bolinhas de status das tarefas e barra do plano acima do prompt",
+  "types": "./types/index.d.ts"
+}
