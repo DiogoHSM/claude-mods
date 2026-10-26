@@ -439,6 +439,13 @@ export const register: Register = on => {
     return ran
   }).catch(($, e, next) => next(e))
 
+  on('ui.render', { component: 'ToolUse' }, async ($, e, next) => {
+    if (e.props.tool !== 'mcp__ccd_turn__update_plan' || e.props.isExpanded) return next(e)
+    const { Box } = $.ui.resolve(e)
+
+    return <Box />
+  })
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)
     const Svg = e.surface === 'terminal' ? undefined : $.ui.resolve(e).Svg
@@ -525,8 +532,8 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const list = (await read($, tasks))[MAIN] ?? []
-    const isActive = list.length >= 2 && list.some(task => task.state !== 'done')
-    if (e.props.hasSurvey || !isActive) return next(e)
+    if (e.props.hasSurvey || list.length < 2) return next(e)
+    const isFinished = list.every(task => task.state === 'done' || task.state === 'error')
     const at = await read($, now)
     const { Box, Text } = $.ui.resolve(e)
     const n = list.length
@@ -555,7 +562,9 @@ export const register: Register = on => {
     return (
       <Box key="plano" flexDirection="column">
         {bar}
-        {head && (
+        {isFinished ? (
+          <Text dimColor>{`Plano concluído · ${done}/${n} etapas · ${percent}%`}</Text>
+        ) : head && (
           <Text dimColor>{`Etapa ${index + 1}/${n} · ${percent}% · ${head.state === 'running' && head.active ? head.active : head.subject} — ${TASK_LABEL[head.state]}`}</Text>
         )}
         <Box flexDirection="column" display="none" hover={{ display: 'flex' }}>

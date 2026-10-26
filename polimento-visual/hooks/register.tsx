@@ -171,6 +171,7 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'ToolUse' }, async ($, e, next) => {
     const own = await next(e)
+    if (e.props.tool === 'mcp__ccd_turn__update_plan') return own
     const kind = kindOf(e.props.tool)
     const color = e.props.isErrored ? '#E24B4A' : COLOR[kind]
     const { Box, Text } = $.ui.resolve(e)
