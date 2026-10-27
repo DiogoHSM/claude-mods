@@ -307,6 +307,12 @@ async function tick($: EngineInterface) {
   if (ended.size > 0) await finish($, ended, at)
 }
 
+const isFinished = (list: TaskDot[]) => list.every(task => task.state === 'done' || task.state === 'error')
+
+async function clearFinished($: EngineInterface) {
+  await setTasks($, MAIN, list => (isFinished(list) ? [] : list))
+}
+
 async function setTasks($: EngineInterface, owner: string, fn: (list: TaskDot[], at: number) => TaskDot[]) {
   const at = await $.clock.now()
   await update($, tasks, plan => ({ ...plan, [owner]: fn(plan[owner] ?? [], at) }))
@@ -428,6 +434,12 @@ export const register: Register = on => {
     return ran
   }).catch(($, e, next) => next(e))
 
+  on('prompt.submit', async ($, e, next) => {
+    await clearFinished($)
+
+    return next(e)
+  }).catch(($, e, next) => next(e))
+
   on('tool.call', { tool: 'mcp__ccd_turn__wrap_up' }, async ($, e, next) => {
     const ran = await next(e)
     if (ran.deny === undefined && !ran.isError) {
@@ -533,9 +545,9 @@ export const register: Register = on => {
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const list = (await read($, tasks))[MAIN] ?? []
     if (e.props.hasSurvey || list.length < 2) return next(e)
-    const isFinished = list.every(task => task.state === 'done' || task.state === 'error')
+    const finished = isFinished(list)
     const at = await read($, now)
-    const { Box, Text } = $.ui.resolve(e)
+    const { Box, Text, Button } = $.ui.resolve(e)
     const n = list.length
     const index = Math.max(
       0,
@@ -562,8 +574,11 @@ export const register: Register = on => {
     return (
       <Box key="plano" flexDirection="column">
         {bar}
-        {isFinished ? (
-          <Text dimColor>{`Plano concluído · ${done}/${n} etapas · ${percent}%`}</Text>
+        {finished ? (
+          <Box flexDirection="row" justifyContent="space-between" alignItems="center">
+            <Text dimColor>{`Plano concluído · ${done}/${n} etapas · ${percent}%`}</Text>
+            <Button key="fechar-plano" label="✕" plain onPress={() => void clearFinished($)} />
+          </Box>
         ) : head && (
           <Text dimColor>{`Etapa ${index + 1}/${n} · ${percent}% · ${head.state === 'running' && head.active ? head.active : head.subject} — ${TASK_LABEL[head.state]}`}</Text>
         )}
