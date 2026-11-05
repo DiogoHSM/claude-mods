@@ -2,6 +2,9 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 const context = atom({ plugin: 'polimento-visual', key: 'context' } as const, null)
+const withMedia = atom({ plugin: 'polimento-visual', key: 'withMedia' } as const, [])
+
+const MEDIA_KEPT = 200
 
 const PERSON = new Set(['composer', 'bridge', 'sdk'])
 
@@ -88,9 +91,21 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const started = await next(e)
     void refreshContext($)
+    const kept = await $.store.get('withMedia')
+    if (Array.isArray(kept)) await update($, withMedia, () => kept as string[])
 
     return started
   })
+
+  on('prompt.submit', async ($, e, next) => {
+    if (e.attachments?.length) {
+      const text = e.text.trim()
+      await update($, withMedia, list => [...list.filter(one => one !== text), text].slice(-MEDIA_KEPT))
+      await $.store.set('withMedia', await read($, withMedia))
+    }
+
+    return next(e)
+  }).catch(($, e, next) => next(e))
 
   on('turn.step', async function* ($, e, next) {
     const step = yield* next(e)
@@ -132,6 +147,7 @@ export const register: Register = on => {
     const own = await next(e)
     if (!PERSON.has(e.props.origin.kind) || e.props.from !== undefined) return own
     const { Box, Text } = $.ui.resolve(e)
+    const media = await read($, withMedia)
     if (e.surface === 'terminal') {
       return (
         <Box borderStyle="round" borderColor="claude" paddingX={1}>
@@ -139,6 +155,8 @@ export const register: Register = on => {
         </Box>
       )
     }
+    // Our bubble only has the text; a message with a photo keeps the engine's, which draws it.
+    if (media.includes(e.props.text.trim())) return own
 
     return (
       <Box flexDirection="row" marginY={1}>

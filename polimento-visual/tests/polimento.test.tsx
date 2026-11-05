@@ -28,6 +28,23 @@ test('sua mensagem ganha borda laranja; a de outro agente não', async ($, on) =
   await note.unmount()
 })
 
+test('mensagem com foto mantém o balão do app, que mostra a imagem', async ($, on) => {
+  engine(on)
+  on('prompt.submit', (_, e) => ({ text: e.text }))
+  on('store.set', () => ({ value: undefined }))
+  await $.prompt.submit({ text: 'olha a foto', attachments: [{ type: 'image' }], wait: false, origin: { kind: 'composer' } } as never)
+
+  const ui = await $.ui.mount({
+    plugin: 'polimento-visual',
+    component: 'UserMessage',
+    surface: 'desktop',
+    requestId: 'foto',
+    props: { text: 'olha a foto', origin: { kind: 'composer' }, isExpanded: false },
+  })
+  expect(await ui.drawn()).toMatchObject({ type: 'Text', children: ['engine'] })
+  await ui.unmount()
+})
+
 test('cada ferramenta ganha um ícone, svg no desktop e glifo no terminal', async ($, on) => {
   engine(on)
   const row = {
