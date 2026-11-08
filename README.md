@@ -41,3 +41,13 @@ Depois de editar um mod, rode `/reload-plugins`.
 claude plugin validate agentes-pixel
 claude plugin test agentes-pixel
 ```
+
+### Cor da borda por máquina
+
+O `polimento-visual` tem a opção `borderColor` (padrão `claude`, o laranja). Use uma cor diferente em cada máquina, por exemplo numa sessão por SSH, para saber onde está trabalhando:
+
+```bash
+echo '{"borderColor":"#3B82F6"}' | claude plugin configure polimento-visual@diogo-mods --values-stdin
+```
+
+Ou dentro do Claude Code: `/plugin configure polimento-visual@diogo-mods`. Aceita cores do tema (`claude`, `success`, `warning`, `error`, `suggestion`) ou hex.

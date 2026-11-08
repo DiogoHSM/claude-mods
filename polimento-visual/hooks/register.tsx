@@ -87,7 +87,9 @@ async function refreshContext($: EngineInterface) {
   await update($, context, () => ({ tokens, window, percent }))
 }
 
-export const register: Register = on => {
+export const register: Register = (on, options) => {
+  const border = typeof options.borderColor === 'string' && options.borderColor.trim() ? options.borderColor.trim() : 'claude'
+
   on('session.start', async ($, e, next) => {
     const started = await next(e)
     void refreshContext($)
@@ -150,7 +152,7 @@ export const register: Register = on => {
     const media = await read($, withMedia)
     if (e.surface === 'terminal') {
       return (
-        <Box borderStyle="round" borderColor="claude" paddingX={1}>
+        <Box borderStyle="round" borderColor={border} paddingX={1}>
           {own}
         </Box>
       )
@@ -160,7 +162,7 @@ export const register: Register = on => {
 
     return (
       <Box flexDirection="row" marginY={1}>
-        <Box flexShrink={1} borderStyle="round" borderColor="claude" paddingX={1}>
+        <Box flexShrink={1} borderStyle="round" borderColor={border} paddingX={1}>
           <Text>{e.props.text}</Text>
         </Box>
       </Box>

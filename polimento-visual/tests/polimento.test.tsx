@@ -81,3 +81,16 @@ test('a pill mostra o contexto usado e o total', async ($, on) => {
   expect(await hint.find({ type: 'Text', text: /48k \/ 200k · 24%/ })).toBeDefined()
   await hint.unmount()
 })
+
+test('a cor da borda vem da opção do mod', { options: { borderColor: '#3B82F6' } }, async ($, on) => {
+  engine(on)
+  const ui = await $.ui.mount({
+    plugin: 'polimento-visual',
+    component: 'UserMessage',
+    surface: 'desktop',
+    requestId: 'cor',
+    props: { text: 'oi', origin: { kind: 'composer' }, isExpanded: false },
+  })
+  expect(await ui.drawn()).toMatchObject({ type: 'Box', children: [{ type: 'Box', props: { borderColor: '#3B82F6' } }] })
+  await ui.unmount()
+})
