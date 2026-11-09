@@ -1,17 +1,17 @@
 {
   "name": "diogo-mods",
-  "description": "Mods pessoais para Claude Code",
+  "description": "Mods for Claude Code",
   "owner": {
     "name": "Diogo"
   },
   "plugins": [
     {
-      "name": "agentes-pixel",
-      "source": "./agentes-pixel"
+      "name": "pixel-agents",
+      "source": "./pixel-agents"
     },
     {
-      "name": "polimento-visual",
-      "source": "./polimento-visual"
+      "name": "visual-polish",
+      "source": "./visual-polish"
     }
   ]
 }

@@ -28,7 +28,7 @@ export type TaskDot = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'agentes-pixel': {
+    'pixel-agents': {
       agents: AgentRow[]
       tasks: Record<string, TaskDot[]>
       now: number

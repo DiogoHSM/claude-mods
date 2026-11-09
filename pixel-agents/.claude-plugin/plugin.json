@@ -1,0 +1,6 @@
+{
+  "name": "pixel-agents",
+  "version": "0.2.0",
+  "description": "Side pane with pixel-art subagents, task status dots and a plan bar above the prompt",
+  "types": "./types/index.d.ts"
+}

@@ -1,8 +1,8 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-const context = atom({ plugin: 'polimento-visual', key: 'context' } as const, null)
-const withMedia = atom({ plugin: 'polimento-visual', key: 'withMedia' } as const, [])
+const context = atom({ plugin: 'visual-polish', key: 'context' } as const, null)
+const withMedia = atom({ plugin: 'visual-polish', key: 'withMedia' } as const, [])
 
 const MEDIA_KEPT = 200
 
@@ -178,7 +178,7 @@ export const register: Register = (on, options) => {
     return (
       <Box flexDirection="row" gap={1} alignItems="flex-start">
         {Svg ? (
-          <Svg source={icon('skill')} alt="Resposta do Claude" width={18} height={18} />
+          <Svg source={icon('skill')} alt="Claude's reply" width={18} height={18} />
         ) : (
           <Text color="claude">{GLYPH.skill}</Text>
         )}

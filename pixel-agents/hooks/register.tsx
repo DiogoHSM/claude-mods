@@ -3,12 +3,12 @@ import type { EngineInterface, Register, Timer } from 'claude-code'
 
 import type { AgentRow, AgentState, TaskDot, TaskState } from '../types'
 
-const PANE = 'agentes-pixel'
+const PANE = 'pixel-agents'
 const MAIN = 'main'
 
-const agents = atom({ plugin: 'agentes-pixel', key: 'agents' } as const, [])
-const tasks = atom({ plugin: 'agentes-pixel', key: 'tasks' } as const, {})
-const now = atom({ plugin: 'agentes-pixel', key: 'now' } as const, 0)
+const agents = atom({ plugin: 'pixel-agents', key: 'agents' } as const, [])
+const tasks = atom({ plugin: 'pixel-agents', key: 'tasks' } as const, {})
+const now = atom({ plugin: 'pixel-agents', key: 'now' } as const, 0)
 
 const HEX: Record<TaskState, string> = {
   pending: '#888780',
@@ -23,15 +23,15 @@ const THEME: Record<TaskState, 'inactive' | 'claude' | 'success' | 'error'> = {
   error: 'error',
 }
 const TASK_LABEL: Record<TaskState, string> = {
-  pending: 'planejado',
-  running: 'executando',
-  done: 'concluído',
-  error: 'erro',
+  pending: 'planned',
+  running: 'running',
+  done: 'done',
+  error: 'error',
 }
 const AGENT_LABEL: Record<AgentState, string> = {
-  running: 'executando',
-  done: 'concluído',
-  error: 'erro',
+  running: 'running',
+  done: 'done',
+  error: 'error',
 }
 const AGENT_TASK: Record<AgentState, TaskState> = {
   running: 'running',
@@ -73,7 +73,7 @@ function family(model: string): { name: string; creature: Creature } {
   if (id.includes('haiku')) return { name: 'Haiku', creature: 'bird' }
   if (id.includes('fable')) return { name: 'Fable', creature: 'cat' }
 
-  return { name: model || 'modelo', creature: 'bot' }
+  return { name: model || 'model', creature: 'bot' }
 }
 
 function sprite(creature: Creature, state: AgentState): string {
@@ -231,9 +231,9 @@ function planSvg(list: TaskDot[]): string {
 function stepLine(task: TaskDot, i: number, n: number, at: number): string {
   const time =
     task.state === 'running' && task.startedAt
-      ? ` · há ${elapsed(at - task.startedAt)}`
+      ? ` · for ${elapsed(at - task.startedAt)}`
       : task.state === 'done' && task.startedAt && task.endedAt
-        ? ` · em ${elapsed(task.endedAt - task.startedAt)}`
+        ? ` · in ${elapsed(task.endedAt - task.startedAt)}`
         : ''
 
   return `${i + 1}/${n} · ${task.subject} — ${TASK_LABEL[task.state]}${time}`
@@ -250,9 +250,9 @@ async function showAgent($: EngineInterface, id: string) {
   if (!row?.result) {
     $.ui.toast(
       row?.state === 'running'
-        ? 'O agent ainda está rodando; o resultado aparece aqui quando terminar.'
+        ? 'The agent is still running; its result shows up here when it finishes.'
         : row
-          ? 'A resposta do agent está chegando; tente de novo em instantes.'
+          ? 'The agent\'s answer is on its way; try again in a moment.'
           : shown.deny,
     )
     return
@@ -266,7 +266,7 @@ let ticker: Timer | undefined
 async function openPane($: EngineInterface) {
   if (isOpen) return
   isOpen = true
-  await $.ui.open({ id: PANE, title: 'Agentes' })
+  await $.ui.open({ id: PANE, title: 'Agents' })
 }
 
 async function finish($: EngineInterface, ended: Map<string, AgentState>, at: number) {
@@ -320,7 +320,7 @@ async function setTasks($: EngineInterface, owner: string, fn: (list: TaskDot[],
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
-    await $.command.register({ name: 'agentes', description: 'Abre o painel de agentes e tarefas' })
+    await $.command.register({ name: 'pixel-agents', description: 'Open the agents and tasks pane' })
     ticker?.cancel()
     ticker = $.clock.every(1000, () => void tick($))
     if ((await read($, agents)).length > 0) void openPane($)
@@ -328,11 +328,11 @@ export const register: Register = on => {
     return next(e)
   })
 
-  on('command.run', { command: 'agentes' }, async $ => {
+  on('command.run', { command: 'pixel-agents' }, async $ => {
     isOpen = false
     await openPane($)
 
-    return { text: 'Painel de agentes aberto.' }
+    return { text: 'Agents pane opened.' }
   })
 
   on('agent.spawn', async ($, e, next) => {
@@ -469,7 +469,7 @@ export const register: Register = on => {
     )
     const owners = Object.entries(plan).filter(([, list]) => list.length > 0)
     const ownerLabel = (owner: string) => {
-      if (owner === MAIN) return 'Principal'
+      if (owner === MAIN) return 'Main'
       const row = rows.find(one => one.id === owner)
 
       return row ? `${family(row.model).name} · ${row.description}` : 'Subagent'
@@ -480,7 +480,7 @@ export const register: Register = on => {
         <Text dimColor size="caption">
           Subagents
         </Text>
-        {ordered.length === 0 && <Text dimColor>Nenhum subagent nesta sessão ainda.</Text>}
+        {ordered.length === 0 && <Text dimColor>No subagents in this session yet.</Text>}
         {ordered.slice(0, 12).map(row => {
           const { name, creature } = family(row.model)
           const color = THEME[AGENT_TASK[row.state]]
@@ -508,13 +508,13 @@ export const register: Register = on => {
                   </Box>
                 )}
               </Box>
-              <Button key={`ver-${row.id}`} label={row.isExpanded ? 'Ocultar' : 'Ver'} plain onPress={() => void showAgent($, row.id)} />
+              <Button key={`view-${row.id}`} label={row.isExpanded ? 'Hide' : 'View'} plain onPress={() => void showAgent($, row.id)} />
             </Box>
           )
         })}
         {owners.length > 0 && (
           <Text dimColor size="caption">
-            Tarefas
+            Tasks
           </Text>
         )}
         {owners.map(([owner, list]) => (
@@ -568,23 +568,23 @@ export const register: Register = on => {
           ))}
         </Box>
       ) : (
-        <Svg source={planSvg(list)} alt={head ? `Etapa atual: ${head.subject}` : 'Plano em andamento'} height={12} />
+        <Svg source={planSvg(list)} alt={head ? `Current step: ${head.subject}` : 'Plan in progress'} height={12} />
       )
 
     return (
-      <Box key="plano" flexDirection="column">
+      <Box key="plan" flexDirection="column">
         {bar}
         {finished ? (
           <Box flexDirection="row" justifyContent="space-between" alignItems="center">
-            <Text dimColor>{`Plano concluído · ${done}/${n} etapas · ${percent}%`}</Text>
-            <Button key="fechar-plano" label="✕" plain onPress={() => void clearFinished($)} />
+            <Text dimColor>{`Plan complete · ${done}/${n} steps · ${percent}%`}</Text>
+            <Button key="close-plan" label="✕" plain onPress={() => void clearFinished($)} />
           </Box>
         ) : head && (
-          <Text dimColor>{`Etapa ${index + 1}/${n} · ${percent}% · ${head.state === 'running' && head.active ? head.active : head.subject} — ${TASK_LABEL[head.state]}`}</Text>
+          <Text dimColor>{`Step ${index + 1}/${n} · ${percent}% · ${head.state === 'running' && head.active ? head.active : head.subject} — ${TASK_LABEL[head.state]}`}</Text>
         )}
         <Box flexDirection="column" display="none" hover={{ display: 'flex' }}>
           {list.map((task, i) => (
-            <Text key={`etapa-${i}`} color={THEME[task.state]}>{`● ${stepLine(task, i, n, at)}`}</Text>
+            <Text key={`step-${i}`} color={THEME[task.state]}>{`● ${stepLine(task, i, n, at)}`}</Text>
           ))}
         </Box>
       </Box>

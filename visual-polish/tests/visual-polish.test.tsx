@@ -8,13 +8,13 @@ const engine = (on: On) =>
     return <Text>engine</Text>
   })
 
-test('sua mensagem ganha borda laranja; a de outro agente não', async ($, on) => {
+test('your message gets an orange border; another agent\'s does not', async ($, on) => {
   engine(on)
-  const base = { plugin: 'polimento-visual', component: 'UserMessage', surface: 'desktop' } as const
+  const base = { plugin: 'visual-polish', component: 'UserMessage', surface: 'desktop' } as const
   const mine = await $.ui.mount({
     ...base,
     requestId: 'm1',
-    props: { text: 'oi', origin: { kind: 'sdk' }, isExpanded: false },
+    props: { text: 'hi', origin: { kind: 'sdk' }, isExpanded: false },
   })
   expect(await mine.drawn()).toMatchObject({ type: 'Box', children: [{ type: 'Box', props: { borderColor: 'claude' } }] })
   await mine.unmount()
@@ -22,33 +22,33 @@ test('sua mensagem ganha borda laranja; a de outro agente não', async ($, on) =
   const note = await $.ui.mount({
     ...base,
     requestId: 'm2',
-    props: { text: 'feito', origin: { kind: 'task-notification' }, isExpanded: false },
+    props: { text: 'done', origin: { kind: 'task-notification' }, isExpanded: false },
   })
   expect(await note.drawn()).toMatchObject({ type: 'Text' })
   await note.unmount()
 })
 
-test('mensagem com foto mantém o balão do app, que mostra a imagem', async ($, on) => {
+test('a message with a photo keeps the app\'s bubble, which shows the image', async ($, on) => {
   engine(on)
   on('prompt.submit', (_, e) => ({ text: e.text }))
   on('store.set', () => ({ value: undefined }))
-  await $.prompt.submit({ text: 'olha a foto', attachments: [{ type: 'image' }], wait: false, origin: { kind: 'composer' } } as never)
+  await $.prompt.submit({ text: 'look at this photo', attachments: [{ type: 'image' }], wait: false, origin: { kind: 'composer' } } as never)
 
   const ui = await $.ui.mount({
-    plugin: 'polimento-visual',
+    plugin: 'visual-polish',
     component: 'UserMessage',
     surface: 'desktop',
-    requestId: 'foto',
-    props: { text: 'olha a foto', origin: { kind: 'composer' }, isExpanded: false },
+    requestId: 'photo',
+    props: { text: 'look at this photo', origin: { kind: 'composer' }, isExpanded: false },
   })
   expect(await ui.drawn()).toMatchObject({ type: 'Text', children: ['engine'] })
   await ui.unmount()
 })
 
-test('cada ferramenta ganha um ícone, svg no desktop e glifo no terminal', async ($, on) => {
+test('each tool gets an icon, svg on desktop and glyph in the terminal', async ($, on) => {
   engine(on)
   const row = {
-    plugin: 'polimento-visual',
+    plugin: 'visual-polish',
     component: 'ToolUse',
     requestId: 't1',
     props: { tool_use_id: 't1', tool: 'Edit', input: {}, isRunning: false, isErrored: false, isInterrupted: false },
@@ -63,7 +63,7 @@ test('cada ferramenta ganha um ícone, svg no desktop e glifo no terminal', asyn
   await terminal.unmount()
 })
 
-test('a pill mostra o contexto usado e o total', async ($, on) => {
+test('the pill shows context used and total', async ($, on) => {
   const clock = mock.clock(on)
   engine(on)
   on('session.start', (_, e) => ({ cwd: e.cwd }))
@@ -72,7 +72,7 @@ test('a pill mostra o contexto usado e o total', async ($, on) => {
   await clock.settle()
 
   const hint = await $.ui.mount({
-    plugin: 'polimento-visual',
+    plugin: 'visual-polish',
     component: 'PromptHint',
     requestId: 'hint',
     surface: 'desktop',
@@ -82,14 +82,14 @@ test('a pill mostra o contexto usado e o total', async ($, on) => {
   await hint.unmount()
 })
 
-test('a cor da borda vem da opção do mod', { options: { borderColor: '#3B82F6' } }, async ($, on) => {
+test('the border color comes from the mod option', { options: { borderColor: '#3B82F6' } }, async ($, on) => {
   engine(on)
   const ui = await $.ui.mount({
-    plugin: 'polimento-visual',
+    plugin: 'visual-polish',
     component: 'UserMessage',
     surface: 'desktop',
-    requestId: 'cor',
-    props: { text: 'oi', origin: { kind: 'composer' }, isExpanded: false },
+    requestId: 'color',
+    props: { text: 'hi', origin: { kind: 'composer' }, isExpanded: false },
   })
   expect(await ui.drawn()).toMatchObject({ type: 'Box', children: [{ type: 'Box', props: { borderColor: '#3B82F6' } }] })
   await ui.unmount()

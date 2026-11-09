@@ -1,0 +1,14 @@
+{
+  "name": "visual-polish",
+  "version": "0.3.0",
+  "description": "Context pill under the prompt, a colored border on your messages and colored icons per tool type",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "borderColor": {
+      "type": "string",
+      "title": "Border color for your messages",
+      "description": "A theme color (claude, success, warning, error, suggestion) or hex (#3B82F6). Handy to tell machines apart, such as an SSH session.",
+      "default": "claude"
+    }
+  }
+}
